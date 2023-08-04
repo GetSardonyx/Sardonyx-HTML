@@ -26,7 +26,7 @@
 		ws.addEventListener("open", (event) => {
 			console.log("Connected to server!")
 			scene = "auth"
-			document.getElementById("scene").innerHTML = "<center><input type='text' id='userinput'><br><input type='password' id='passinput'><br><button onclick='doLogin()'>Log in</button><button onclick='doSignup()'>Sign up</button></center>"
+			document.getElementById("scene").innerHTML = "<center><input type='text' id='userinput'><br><input type='password' id='passinput'><br><button onclick='doLogin()'>Log in</button><button onclick='doSignup()'>Sign up</button><br><small>By signing up, you agree to the <a href='https://getsardonyx.github.io/Sardonyx-Legal/TOS.html'>Terms of Service</a> and <a href='https://getsardonyx.github.io/Sardonyx-Legal/PRIVACY.html'>Privacy Policy</a></small></center>"
 		});
 		
 		ws.onclose = (event) => {

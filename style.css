@@ -30,3 +30,11 @@ input[type=text], input[type=password] {
 	border: 3px solid;
 	padding: 4px 4px;
 }
+
+a:link, a:visited {
+	color: white;
+}
+  
+a:hover, a:active { 
+	color: grey;
+}
