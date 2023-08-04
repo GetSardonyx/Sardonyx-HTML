@@ -1,7 +1,51 @@
 <!DOCTYPE html>
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Sardonyx</title>
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,700,1,0" />
 </head>
 <body>
-	<div id="scene">Loading...</div>
+	<div id="header"></div>
+	<div id="functions"></div>
+	<div id="scene"><center><h1>Loading...</h1></center></div>
+	<script>
+		const ws = new WebSocket("ws://localhost:9001")
+		var scene = "loading"
+		
+		ws.addEventListener("open", (event) => {
+			console.log("Connected to server!")
+			scene = "auth"
+			document.getElementById("scene").innerHTML = "<center><input type='text' id='userinput'><br><input type='password' id='passinput'><br><button onclick='doLogin()'>Log in</button><button onclick='doSignup()'>Sign up</button></center>"
+		});
+		
+		ws.addEventListener("message", (event) => {
+		  console.log("INC: " + event.data);
+		  try {
+		  	var resb = event.data
+		  	var resa = resb.replace(/'/g, '"');
+		  	var resu = JSON.parse(resa);
+		  } catch (error) {
+		  	console.warn("Couldn't parse JSON, result may be an array or status code: " + error)
+		  	if (event.data == "902 - Bound") {
+		  		if (scene == "auth") {
+		  			document.getElementById("scene").innerHTML = "<center><h1>Fetching posts...</h1></center>"
+		  			scene = "home"
+		  		}
+		  	}
+		  }
+		});
+		
+		function doLogin() {
+			var data = '{"ask": "login", "username": "' + document.getElementById('userinput').value + '", "password": "' + document.getElementById('passinput').value + '"}'
+			console.log(data)
+			ws.send(data)
+		}
+		
+		function doSignup() {
+			var data = '{"ask": "signup", "username": "' + document.getElementById('userinput').value + '", "password": "' + document.getElementById('passinput').value + '"}'
+			console.log(data)
+			ws.send(data)
+		}
+	</script>
 </body>
