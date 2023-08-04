@@ -12,6 +12,8 @@
 	<script>
 		const ws = new WebSocket("ws://localhost:9001")
 		var scene = "loading"
+		var usrn = ""
+		var state = 0
 		
 		function sleep(milliseconds) { // thanks to sitepoint.com for this thing
 			const date = Date.now();
@@ -27,6 +29,11 @@
 			document.getElementById("scene").innerHTML = "<center><input type='text' id='userinput'><br><input type='password' id='passinput'><br><button onclick='doLogin()'>Log in</button><button onclick='doSignup()'>Sign up</button></center>"
 		});
 		
+		ws.onclose = (event) => {
+			confirm("Connection lost. The page will now reload.");
+			window.location.reload();
+		};
+		
 		ws.addEventListener("message", (event) => {
 		  console.log("INC: " + event.data);
 		  var resb = event.data
@@ -41,7 +48,7 @@
 		  		if (scene == "auth") {
 		  			document.getElementById("scene").innerHTML = "<center><h1>Fetching posts...</h1></center>"
 		  			scene = "postfetch"
-		  			sleep(250)
+		  			sleep(300)
 		  			var data = '{"ask": "get_posts"}'
 						console.log(data)
 						ws.send(data)
@@ -55,16 +62,41 @@
 		  			console.log(resu.length)
 		  			for (const x in resu) {
 		  				var resf = resu[x]
-		  				console.log(resf["_id"])
-			  			document.getElementById("scene").innerHTML += "<br><div id='post'><h2>" + resf["username"] + "</h2><p>" + resf["content"] + "</p></div>"
+		  				console.log("Loading post " + resf["_id"])
+		  				tsr = resf["timestamp"]
+		  				tsra = tsr * 1000
+		  				tsrb = Math.trunc(tsra)
+		  				var ts = new Date();
+							ts.setTime(tsrb);
+							sts = ts.toLocaleString();
+			  			document.getElementById("scene").innerHTML += "<br><div id='post'><h2>" + resf["username"] + "</h2><small>" + sts + " // <u><rep onclick='reportPost(\"" + resf["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resf["_id"] + "</small><p>" + resf["content"] + "</p></div>"
 			  		}
 		  		} else {
 		  			document.getElementById("scene").innerHTML = "<center><h2>Looks like there's nothing here yet...</h2><h3>Why not get the conversation started?</h3></center>"
 		  		}
-		  		document.getElementById("functions").innerHTML = "<center><input type='text' id='postinput'><br><button onclick='sendPost()'>Post!</button>"
-		  		scene = "allowposts"
+		  		document.getElementById("functions").innerHTML = "<center><input type='text' id='postinput'><button onclick='sendPost()'>Post!</button>"
+		  		sleep(300)
+		  		scene = "getprf"
+		  		var data = '{"ask": "get_user_state", "username": "' + usrn + '"}'
+					console.log(data)
+					ws.send(data)
 		  	} else if (scene == "allowposts") {
-		  		document.getElementById("scene").insertAdjacentHTML("afterbegin", "<br><div id='post'><h2>" + resu["username"] + "</h2><p>" + resu["content"] + "</p></div>")
+		  		tsr = resu["timestamp"]
+		  		tsra = tsr * 1000
+		  		tsrb = Math.trunc(tsra)
+		  		var ts = new Date();
+					ts.setTime(tsrb);
+					sts = ts.toLocaleString();
+		  		document.getElementById("scene").insertAdjacentHTML("afterbegin", "<br><div id='post'><h2>" + resu["username"] + "</h2><small>" + sts + " // <u><rep onclick='reportPost(\"" + resu["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resu["_id"] + "</small><p>" + resu["content"] + "</p></div>")
+		  	} else if (scene == "getprf") {
+		  		state = resu["state"]
+		  		if (state != 0) {
+		  			document.getElementById("functions").innerHTML += "<center><input type='text' id='modinput'><button onclick='banUser()'>Ban</button><button onclick='kickUser()'>Kick</button><button onclick='checkReps()'>Check Reports</button></center>"
+		  		}
+		  		scene = "allowposts"
+		  	} else if (scene == "checkrep") {
+		  		alert(resu)
+		  		scene == "allowposts"
 		  	}
 		  }
 		});
@@ -73,12 +105,14 @@
 			var data = '{"ask": "login", "username": "' + document.getElementById('userinput').value + '", "password": "' + document.getElementById('passinput').value + '"}'
 			console.log(data)
 			ws.send(data)
+			usrn = document.getElementById('userinput').value
 		}
 		
 		function doSignup() {
 			var data = '{"ask": "signup", "username": "' + document.getElementById('userinput').value + '", "password": "' + document.getElementById('passinput').value + '"}'
 			console.log(data)
 			ws.send(data)
+			usrn = document.getElementById('userinput').value
 		}
 		
 		function sendPost() {
@@ -86,6 +120,31 @@
 			console.log(data)
 			ws.send(data)
 			document.getElementById('postinput').value = ""
+		}
+		
+		function reportPost(id, username) {
+			var data = '{"ask": "report_post", "id": "' + id + '", "reason": "Sardonyx-HTML easy report from ' + username +'."}'
+			console.log(data)
+			ws.send(data)
+		}
+		
+		function banUser() {
+			var data = '{"ask": "ban", "username": "' + document.getElementById('modinput').value + '"}'
+			console.log(data)
+			ws.send(data)
+		}
+		
+		function kickUser() {
+			var data = '{"ask": "kick", "username": "' + document.getElementById('modinput').value + '"}'
+			console.log(data)
+			ws.send(data)
+		}
+		
+		function checkReps() {
+			scene = "checkrep"
+			var data = '{"ask": "get_reports", "id": "' + document.getElementById('modinput').value + '"}'
+			console.log(data)
+			ws.send(data)
 		}
 	</script>
 </body>
