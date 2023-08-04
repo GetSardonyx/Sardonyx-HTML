@@ -13,6 +13,14 @@
 		const ws = new WebSocket("ws://localhost:9001")
 		var scene = "loading"
 		
+		function sleep(milliseconds) { // thanks to sitepoint.com for this thing
+			const date = Date.now();
+			let currentDate = null;
+			do {
+				currentDate = Date.now();
+			} while (currentDate - date < milliseconds);
+		}
+		
 		ws.addEventListener("open", (event) => {
 			console.log("Connected to server!")
 			scene = "auth"
@@ -21,17 +29,42 @@
 		
 		ws.addEventListener("message", (event) => {
 		  console.log("INC: " + event.data);
+		  var resb = event.data
+		  var isJSON = true
 		  try {
-		  	var resb = event.data
 		  	var resa = resb.replace(/'/g, '"');
 		  	var resu = JSON.parse(resa);
 		  } catch (error) {
+		  	var isJSON = false
 		  	console.warn("Couldn't parse JSON, result may be an array or status code: " + error)
 		  	if (event.data == "902 - Bound") {
 		  		if (scene == "auth") {
 		  			document.getElementById("scene").innerHTML = "<center><h1>Fetching posts...</h1></center>"
-		  			scene = "home"
+		  			scene = "postfetch"
+		  			sleep(250)
+		  			var data = '{"ask": "get_posts"}'
+						console.log(data)
+						ws.send(data)
 		  		}
+		  	}
+		  }
+		  if (isJSON) {
+		  	if (scene == "postfetch") {
+		  		if (resu.length != 0) {
+		  			document.getElementById("scene").innerHTML = ""
+		  			console.log(resu.length)
+		  			for (const x in resu) {
+		  				var resf = resu[x]
+		  				console.log(resf["_id"])
+			  			document.getElementById("scene").innerHTML += "<br><div id='post'><h2>" + resf["username"] + "</h2><p>" + resf["content"] + "</p></div>"
+			  		}
+		  		} else {
+		  			document.getElementById("scene").innerHTML = "<center><h2>Looks like there's nothing here yet...</h2><h3>Why not get the conversation started?</h3></center>"
+		  		}
+		  		document.getElementById("functions").innerHTML = "<center><input type='text' id='postinput'><br><button onclick='sendPost()'>Post!</button>"
+		  		scene = "allowposts"
+		  	} else if (scene == "allowposts") {
+		  		document.getElementById("scene").insertAdjacentHTML("afterbegin", "<br><div id='post'><h2>" + resu["username"] + "</h2><p>" + resu["content"] + "</p></div>")
 		  	}
 		  }
 		});
@@ -46,6 +79,13 @@
 			var data = '{"ask": "signup", "username": "' + document.getElementById('userinput').value + '", "password": "' + document.getElementById('passinput').value + '"}'
 			console.log(data)
 			ws.send(data)
+		}
+		
+		function sendPost() {
+			var data = '{"ask": "post", "msg": "' + document.getElementById('postinput').value + '"}'
+			console.log(data)
+			ws.send(data)
+			document.getElementById('postinput').value = ""
 		}
 	</script>
 </body>
