@@ -14,10 +14,10 @@
 		fetch('url.txt')
 			.then(response => response.text()) 
 			.then(textString => {
-				wsr = textString
+				var wsr = textString
 			});
 	
-		const ws = new WebSocket(wsr)
+		const ws = new WebSocket("ws://198.41.192.7")
 		var scene = "loading"
 		var usrn = ""
 		var state = 0
