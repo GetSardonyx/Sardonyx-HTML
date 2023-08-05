@@ -31,8 +31,9 @@
 		});
 		
 		ws.onclose = (event) => {
-			confirm("Connection lost. The page will now reload.");
-			window.location.reload();
+			document.getElementById("header").innerHTML = "<center><h1>Connection lost.</h1><h2>Try reloading the page, and if that doesn't work, check back later.</h2></center>"
+			document.getElementById("functions").innerHTML = ""
+			document.getElementById("scene").innerHTML = ""
 		};
 		
 		ws.addEventListener("message", (event) => {
@@ -70,7 +71,7 @@
 		  				var ts = new Date();
 							ts.setTime(tsrb);
 							sts = ts.toLocaleString();
-			  			document.getElementById("scene").innerHTML += "<br><div id='post'><h2>" + resf["username"] + "</h2><small>" + sts + " // <u><rep onclick='reportPost(\"" + resf["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resf["_id"] + "</small><p>" + resf["content"] + "</p></div>"
+			  			document.getElementById("scene").innerHTML += "<br><div id='post'><h2>" + resf["username"] + "</h2><small>" + sts + " // <u><rep id='curs' onclick='reportPost(\"" + resf["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resf["_id"] + "</small><p>" + resf["content"] + "</p></div>"
 			  		}
 		  		} else {
 		  			document.getElementById("scene").innerHTML = "<center><h2>Looks like there's nothing here yet...</h2><h3>Why not get the conversation started?</h3></center>"
@@ -88,7 +89,7 @@
 		  		var ts = new Date();
 					ts.setTime(tsrb);
 					sts = ts.toLocaleString();
-		  		document.getElementById("scene").insertAdjacentHTML("afterbegin", "<br><div id='post'><h2>" + resu["username"] + "</h2><small>" + sts + " // <u><rep onclick='reportPost(\"" + resu["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resu["_id"] + "</small><p>" + resu["content"] + "</p></div>")
+		  		document.getElementById("scene").insertAdjacentHTML("afterbegin", "<br><div id='post'><h2>" + resu["username"] + "</h2><small>" + sts + " // <u><rep id='curs' onclick='reportPost(\"" + resu["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resu["_id"] + "</small><p>" + resu["content"] + "</p></div>")
 		  	} else if (scene == "getprf") {
 		  		state = resu["state"]
 		  		if (state != 0) {

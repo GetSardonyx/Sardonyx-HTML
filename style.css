@@ -13,6 +13,7 @@ button {
 	padding: 10px 14px;
 	font-size: 16px;
 	margin: 5px 5px;
+	cursor: pointer;
 }
 
 input[type=text], input[type=password] {
@@ -28,7 +29,7 @@ input[type=text], input[type=password] {
 #post {
 	border-color: #8a2d59;
 	border: 3px solid;
-	padding: 4px 4px;
+	padding: 8px 8px;
 }
 
 a:link, a:visited {
@@ -37,4 +38,8 @@ a:link, a:visited {
   
 a:hover, a:active { 
 	color: grey;
+}
+
+#curs {
+	cursor: pointer;
 }
