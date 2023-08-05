@@ -2,6 +2,7 @@
 <head>
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<link rel="apple-touch-icon" href="icon.png">
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Sardonyx</title>
 	<link rel="stylesheet" href="style.css">
@@ -12,6 +13,7 @@
 	<div id="functions"></div>
 	<div id="scene"><center><h1>Loading...</h1></center></div>
 	<script>
+		const version = "public-beta-1" // change this every update cause yes
 		wsr = "wss://fits-whats-passport-alike.trycloudflare.com" // change this to whatever the server url is
 		const ws = new WebSocket(wsr)
 		var scene = "loading"
@@ -29,7 +31,7 @@
 		ws.addEventListener("open", (event) => {
 			console.log("Connected to server!")
 			scene = "auth"
-			document.getElementById("scene").innerHTML = "<center><input type='text' id='userinput'><br><input type='password' id='passinput'><br><button onclick='doLogin()'>Log in</button><button onclick='doSignup()'>Sign up</button><br><small>By signing up, you agree to the <a href='https://getsardonyx.github.io/Sardonyx-Legal/TOS.html'>Terms of Service</a> and <a href='https://getsardonyx.github.io/Sardonyx-Legal/PRIVACY.html'>Privacy Policy</a></small></center>"
+			document.getElementById("scene").innerHTML = "<center><input type='text' id='userinput'><br><input type='password' id='passinput'><br><button onclick='doLogin()'>Log in</button><button onclick='doSignup()'>Sign up</button><br><small>By signing up, you agree to the <a href='https://getsardonyx.github.io/Sardonyx-Legal/TOS.html'>Terms of Service</a> and <a href='https://getsardonyx.github.io/Sardonyx-Legal/PRIVACY.html'>Privacy Policy</a>.<br>Version " + version + "</small></center>"
 		});
 		
 		ws.onclose = (event) => {
