@@ -14,7 +14,7 @@
 	<div id="scene"><center><h1>Loading...</h1></center></div>
 	<script>
 		const version = "public-beta-3" // change this every update cause yes
-		wsr = "wss://fits-whats-passport-alike.trycloudflare.com" // change this to whatever the server url is
+		wsr = "ws://localhost:9001" // change this to whatever the server url is
 		const ws = new WebSocket(wsr)
 		var scene = "loading"
 		var usrn = ""
@@ -45,8 +45,7 @@
 		  var resb = event.data
 		  var isJSON = true
 		  try {
-		  	var resa = resb.replace(/'/g, '"');
-		  	var resu = JSON.parse(resa);
+		  	var resu = JSON.parse(resb);
 		  } catch (error) {
 		  	var isJSON = false
 		  	console.warn("Couldn't parse JSON, result may be an array or status code: " + error)
@@ -55,9 +54,9 @@
 		  			document.getElementById("scene").innerHTML = "<center><h1>Fetching posts...</h1></center>"
 		  			scene = "postfetch"
 		  			sleep(300)
-		  			var data = '{"ask": "get_posts"}'
-						console.log(data)
-						ws.send(data)
+		  			var data = JSON.stringify({ask: "get_posts"})
+					console.log(data)
+					ws.send(data)
 		  		}
 		  	}
 		  }
@@ -66,16 +65,32 @@
 		  		if (resu.length != 0) {
 		  			document.getElementById("scene").innerHTML = ""
 		  			console.log(resu.length)
-		  			for (const x in resu) {
-		  				var resf = resu[x]
+		  			for (const resf of resu) {
 		  				console.log("Loading post " + resf["_id"])
 		  				tsr = resf["timestamp"]
 		  				tsra = tsr * 1000
 		  				tsrb = Math.trunc(tsra)
 		  				var ts = new Date();
-							ts.setTime(tsrb);
-							sts = ts.toLocaleString();
-			  			document.getElementById("scene").innerHTML += "<br><div id='post'><h2>" + resf["username"] + "</h2><small>" + sts + " // <u><rep id='curs' onclick='reportPost(\"" + resf["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resf["_id"] + "</small><p>" + resf["content"] + "</p></div>"
+						ts.setTime(tsrb);
+						sts = ts.toLocaleString();
+
+						var post = document.createElement("div");
+						post.classList.add("post");
+
+						var postUsername = document.createElement("h2");
+						postUsername.innerText = resf["username"];
+						post.appendChild(postUsername);
+
+                        var postDetails = document.createElement("small");
+                        postDetails.innerHTML = `${sts} // <u><rep class='curs' onclick='reportPost("${resf["_id"]}", "${usrn}")'>Report this post</rep></u> // ${resf["_id"]}`;
+                        post.appendChild(postDetails);
+
+						var postContent = document.createElement("p");
+						postContent.innerText = resf["content"];
+						post.appendChild(postContent);
+
+						document.getElementById("scene").appendChild(post);
+			  			//document.getElementById("scene").innerHTML += "<br><div id='post'><h2>" + resf["username"] + "</h2><small>" + sts + " // <u><rep id='curs' onclick='reportPost(\"" + resf["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resf["_id"] + "</small><p >" + resf["content"] + "</p></div>"
 			  		}
 		  		} else {
 		  			document.getElementById("scene").innerHTML = "<center><h2>Looks like there's nothing here yet...</h2><h3>Why not get the conversation started?</h3></center>"
@@ -83,17 +98,39 @@
 		  		document.getElementById("functions").innerHTML = "<center><input type='text' id='postinput'><button onclick='sendPost()'>Post!</button>"
 		  		sleep(300)
 		  		scene = "getprf"
-		  		var data = '{"ask": "get_user_state", "username": "' + usrn + '"}'
-					console.log(data)
-					ws.send(data)
+		  		var data = JSON.stringify({ask: "get_user_state", username: usrn})
+				console.log(data)
+				ws.send(data)
 		  	} else if (scene == "allowposts") {
 		  		tsr = resu["timestamp"]
 		  		tsra = tsr * 1000
 		  		tsrb = Math.trunc(tsra)
 		  		var ts = new Date();
-					ts.setTime(tsrb);
-					sts = ts.toLocaleString();
-		  		document.getElementById("scene").insertAdjacentHTML("afterbegin", "<br><div id='post'><h2>" + resu["username"] + "</h2><small>" + sts + " // <u><rep id='curs' onclick='reportPost(\"" + resu["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resu["_id"] + "</small><p>" + resu["content"] + "</p></div>")
+				ts.setTime(tsrb);
+				sts = ts.toLocaleString();
+
+                var post = document.createElement("div");
+                post.classList.add("post");
+
+                var postUsername = document.createElement("h2");
+                postUsername.innerText = resu["username"];
+                post.appendChild(postUsername);
+
+                var postDetails = document.createElement("small");
+                postDetails.innerHTML = `${sts} // <u><rep class='curs' onclick='reportPost("${resu["_id"]}", "${usrn}")'>Report this post</rep></u> // ${resu["_id"]}`;
+                post.appendChild(postDetails);
+
+                var postContent = document.createElement("p");
+                postContent.innerText = resu["content"];
+                post.appendChild(postContent);
+
+                if (document.getElementById("scene").firstChild) {
+                    document.getElementById("scene").insertBefore(post, document.getElementById("scene").firstChild);
+                } else {
+                    document.getElementById("scene").appendChild(post);
+                }
+
+		  		//document.getElementById("scene").insertAdjacentHTML("afterbegin", "<br><div id='post'><h2>" + resu["username"] + "</h2><small>" + sts + " // <u><rep id='curs' onclick='reportPost(\"" + resu["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resu["_id"] + "</small><p>" + resu["content"] + "</p></div>")
 		  	} else if (scene == "getprf") {
 		  		state = resu["state"]
 		  		if (state != 0) {
@@ -102,59 +139,59 @@
 		  		scene = "allowposts"
 		  	} else if (scene == "checkrep") {
 		  		alert(resu)
-		  		scene == "allowposts"
+		  		scene = "allowposts"
 		  	}
 		  }
 		});
 		
 		function doLogin() {
-			var data = '{"ask": "login", "username": "' + document.getElementById('userinput').value + '", "password": "' + document.getElementById('passinput').value + '"}'
+			var data = JSON.stringify({ask: "login", username: document.getElementById('userinput').value, password: document.getElementById('passinput').value})
 			console.log(data)
 			ws.send(data)
 			usrn = document.getElementById('userinput').value
 		}
 		
 		function doSignup() {
-			var data = '{"ask": "signup", "username": "' + document.getElementById('userinput').value + '", "password": "' + document.getElementById('passinput').value + '"}'
+			var data = JSON.stringify({ask: "signup", username: document.getElementById('userinput').value, "password": document.getElementById('passinput').value})
 			console.log(data)
 			ws.send(data)
 			usrn = document.getElementById('userinput').value
 		}
 		
 		function sendPost() {
-			var data = '{"ask": "post", "msg": "' + document.getElementById('postinput').value + '"}'
+			var data = JSON.stringify({ask: "post", msg: document.getElementById('postinput').value})
 			console.log(data)
 			ws.send(data)
 			document.getElementById('postinput').value = ""
 		}
 		
-		function reportPost(id, username) {
-			var data = '{"ask": "report_post", "id": "' + id + '", "reason": "Sardonyx-HTML easy report from ' + username +'."}'
+		function reportPost(postId, username) {
+			var data = JSON.stringify({ask: "report_post", id: postId, reason: `Sardonyx-HTML easy report from ${username}.`})
 			console.log(data)
 			ws.send(data)
 		}
 		
 		function banUser() {
-			var data = '{"ask": "ban", "username": "' + document.getElementById('modinput').value + '"}'
+			var data = JSON.stringify({ask: "ban", username: document.getElementById('modinput').value})
 			console.log(data)
 			ws.send(data)
 		}
 		
 		function kickUser() {
-			var data = '{"ask": "kick", "username": "' + document.getElementById('modinput').value + '"}'
+            var data = JSON.stringify({ask: "kick", username: document.getElementById('modinput').value})
 			console.log(data)
 			ws.send(data)
 		}
 		
 		function checkReps() {
 			scene = "checkrep"
-			var data = '{"ask": "get_reports", "id": "' + document.getElementById('modinput').value + '"}'
+            var data = JSON.stringify({ask: "get_reports", id: document.getElementById('modinput').value})
 			console.log(data)
 			ws.send(data)
 		}
 	
 		function ping() {
-			ws.send('{"ask": "ping"}')
+			ws.send(JSON.stringify({ask: "ping"}))
 		}
 
 		setInterval(ping, 10000)
