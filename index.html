@@ -13,7 +13,7 @@
 	<div id="functions"></div>
 	<div id="scene"><center><h1>Loading...</h1></center></div>
 	<script>
-		const version = "public-beta-2" // change this every update cause yes
+		const version = "public-beta-3" // change this every update cause yes
 		wsr = "wss://fits-whats-passport-alike.trycloudflare.com" // change this to whatever the server url is
 		const ws = new WebSocket(wsr)
 		var scene = "loading"
@@ -157,6 +157,6 @@
 			ws.send('{"ask": "ping"}')
 		}
 
-		setInterval(ping, 7500)
+		setInterval(ping, 10000)
 	</script>
 </body>
