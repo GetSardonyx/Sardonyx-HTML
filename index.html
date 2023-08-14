@@ -13,7 +13,7 @@
 	<div id="functions"></div>
 	<div id="scene"><center><h1>Loading...</h1></center></div>
 	<script>
-		const version = "public-beta-5" // change this every update cause yes
+		const version = "public-beta-6" // change this every update cause yes
 		wsr = "wss://server.getsardonyx.cc" // change this to whatever the server url is
 		const ws = new WebSocket(wsr)
 		var scene = "loading"
@@ -89,6 +89,9 @@
 						postContent.innerText = resf["content"];
 						post.appendChild(postContent);
 
+						var breakline = document.createElement("br");
+						post.appendChild(breakline);
+
 						document.getElementById("scene").appendChild(post);
 			  			//document.getElementById("scene").innerHTML += "<br><div id='post'><h2>" + resf["username"] + "</h2><small>" + sts + " // <u><rep id='curs' onclick='reportPost(\"" + resf["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resf["_id"] + "</small><p >" + resf["content"] + "</p></div>"
 			  		}
@@ -123,6 +126,9 @@
                 var postContent = document.createElement("p");
                 postContent.innerText = resu["content"];
                 post.appendChild(postContent);
+
+		var breakline = document.createElement("br");
+		post.appendChild(breakline);
 
                 if (document.getElementById("scene").firstChild) {
                     document.getElementById("scene").insertBefore(post, document.getElementById("scene").firstChild);
