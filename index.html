@@ -35,7 +35,8 @@
 		});
 		
 		ws.onclose = (event) => {
-			document.getElementById("header").innerHTML = "<center><h1>Connection lost.</h1><h2>Try reloading the page, and if that doesn't work, check back later.</h2></center>"
+		//	document.getElementById("header").innerHTML = "<center><h1>Connection lost.</h1><h2>Try reloading the page, and if that doesn't work, check back later.</h2></center>"
+			document.getElementById("header").innerHTML = "<center><h1>Thanks for trying the first beta.</h1><h2>We're offline for now, but we'll be back.</h2></center>"
 			document.getElementById("functions").innerHTML = ""
 			document.getElementById("scene").innerHTML = ""
 		};
