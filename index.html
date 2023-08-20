@@ -205,7 +205,7 @@
 			post.appendChild(postContent);
 			
 			var postLike = document.createElement("thethingy");
-			postLike.innerHTML = `<div id='${resf["_id"]}'><u><rep class='curs' onclick='likePost("${resf["_id"]}")'>${resf["likes"].length} likes</rep></u></div>`;
+			postLike.innerHTML = `<div id='${resf["_id"]}'><u><rep class='curs' onclick='likePost("${resf["_id"]}")'>${resf["likes"].length} likes</rep></u></div> <b>·</b> <a href='https://getsardonyx.cc/post.html?${resf["_id"]}'>Share</a>`;
 			post.appendChild(postLike);
 
 			if (isFetch) {
