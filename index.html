@@ -6,14 +6,15 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Sardonyx</title>
 	<link rel="stylesheet" href="style.css">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,700,1,0" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
 </head>
 <body>
 	<div id="header"></div>
+	<div id="errors"></div>
 	<div id="functions"></div>
 	<div id="scene"><center><h1>Loading...</h1></center></div>
 	<script>
-		const version = "public-beta-6" // change this every update cause yes
+		const version = "public-beta-2-1" // change this every update cause yes
 		wsr = "wss://server.getsardonyx.cc" // change this to whatever the server url is
 		const ws = new WebSocket(wsr)
 		var scene = "loading"
@@ -35,8 +36,7 @@
 		});
 		
 		ws.onclose = (event) => {
-		//	document.getElementById("header").innerHTML = "<center><h1>Connection lost.</h1><h2>Try reloading the page, and if that doesn't work, check back later.</h2></center>"
-			document.getElementById("header").innerHTML = "<center><h1>Thanks for trying the first beta.</h1><h2>We're offline for now, but we'll be back.</h2></center>"
+			document.getElementById("header").innerHTML = "<center><h1>Connection lost.</h1><h2>Try reloading the page, and if that doesn't work, check back later.</h2><small>You can also check <a href='https://status.getsardonyx.cc'>our status page</a>.</small></center>"
 			document.getElementById("functions").innerHTML = ""
 			document.getElementById("scene").innerHTML = ""
 		};
@@ -50,16 +50,29 @@
 		  } catch (error) {
 		  	var isJSON = false
 		  	console.warn("Couldn't parse JSON, result may be an array or status code: " + error)
-		  	if (event.data == "902 - Bound") {
-		  		if (scene == "auth") {
+			if (scene == "auth") {
+		  		if (event.data == "902 - Bound") {
+					document.getElementById("errors").innerHTML = ""
 		  			document.getElementById("scene").innerHTML = "<center><h1>Fetching posts...</h1></center>"
 		  			scene = "postfetch"
 		  			sleep(300)
 		  			var data = JSON.stringify({ask: "get_posts"})
 					console.log(data)
 					ws.send(data)
-		  		}
-		  	}
+				} else if (event.data == "704 - Invalid Password") {
+					document.getElementById("errors").innerHTML = "<center><b>Invalid password.</b><center/>"
+				} else if (event.data == "703 - Invalid Username") {
+					document.getElementById("errors").innerHTML = "<center><b>Invalid username.</b><center/>"
+				} else if (event.data == "705 - Account Banned") {
+					document.getElementById("errors").innerHTML = "<center><b>This account is banned from Sardonyx.</b><center/>"
+				} else if (event.data == "706 - Character Limit") {
+					document.getElementById("errors").innerHTML = "<center><b>Character limit reached.</b><center/>"
+				} else if (event.data == "605 - Ratelimited") {
+					document.getElementById("errors").innerHTML = "<center><b>Ratelimited, try again later.</b><center/>"
+				} else if (event.data == "803 - Signup Error") {
+					document.getElementById("errors").innerHTML = "<center><b>An error occured during signup, try again later.</b><center/>"
+				}
+			}
 		  }
 		  if (isJSON) {
 		  	if (scene == "postfetch") {
@@ -67,71 +80,20 @@
 		  			document.getElementById("scene").innerHTML = ""
 		  			console.log(resu.length)
 		  			for (const resf of resu) {
-		  				console.log("Loading post " + resf["_id"])
-		  				tsr = resf["timestamp"]
-		  				tsra = tsr * 1000
-		  				tsrb = Math.trunc(tsra)
-		  				var ts = new Date();
-						ts.setTime(tsrb);
-						sts = ts.toLocaleString();
-
-						var post = document.createElement("div");
-						post.classList.add("post");
-
-						var postUsername = document.createElement("h2");
-						postUsername.innerText = resf["username"];
-						post.appendChild(postUsername);
-
-                        var postDetails = document.createElement("small");
-                        postDetails.innerHTML = `${sts} // <u><rep class='curs' onclick='reportPost("${resf["_id"]}", "${usrn}")'>Report this post</rep></u> // ${resf["_id"]}`;
-                        post.appendChild(postDetails);
-
-						var postContent = document.createElement("p");
-						postContent.innerText = resf["content"];
-						post.appendChild(postContent);
-
-						document.getElementById("scene").appendChild(post);
-			  			//document.getElementById("scene").innerHTML += "<br><div id='post'><h2>" + resf["username"] + "</h2><small>" + sts + " // <u><rep id='curs' onclick='reportPost(\"" + resf["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resf["_id"] + "</small><p >" + resf["content"] + "</p></div>"
+		  				loadPost(resf, true)
 			  		}
 		  		} else {
 		  			document.getElementById("scene").innerHTML = "<center><h2>Looks like there's nothing here yet...</h2><h3>Why not get the conversation started?</h3></center>"
 		  		}
 		  		document.getElementById("functions").innerHTML = "<center><input type='text' id='postinput'><button onclick='sendPost()'>Post!</button>"
+				document.getElementById("header").innerHTML = "<center><u><rep class='curs' onclick='setBio()'>Set your bio</rep></u></center>"
 		  		sleep(300)
 		  		scene = "getprf"
 		  		var data = JSON.stringify({ask: "get_user_state", username: usrn})
 				console.log(data)
 				ws.send(data)
 		  	} else if (scene == "allowposts") {
-		  		tsr = resu["timestamp"]
-		  		tsra = tsr * 1000
-		  		tsrb = Math.trunc(tsra)
-		  		var ts = new Date();
-				ts.setTime(tsrb);
-				sts = ts.toLocaleString();
-
-                var post = document.createElement("div");
-                post.classList.add("post");
-
-                var postUsername = document.createElement("h2");
-                postUsername.innerText = resu["username"];
-                post.appendChild(postUsername);
-
-                var postDetails = document.createElement("small");
-                postDetails.innerHTML = `${sts} // <u><rep class='curs' onclick='reportPost("${resu["_id"]}", "${usrn}")'>Report this post</rep></u> // ${resu["_id"]}`;
-                post.appendChild(postDetails);
-
-                var postContent = document.createElement("p");
-                postContent.innerText = resu["content"];
-                post.appendChild(postContent);
-
-                if (document.getElementById("scene").firstChild) {
-                    document.getElementById("scene").insertBefore(post, document.getElementById("scene").firstChild);
-                } else {
-                    document.getElementById("scene").appendChild(post);
-                }
-
-		  		//document.getElementById("scene").insertAdjacentHTML("afterbegin", "<br><div id='post'><h2>" + resu["username"] + "</h2><small>" + sts + " // <u><rep id='curs' onclick='reportPost(\"" + resu["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resu["_id"] + "</small><p>" + resu["content"] + "</p></div>")
+		  		loadPost(resu, false)
 		  	} else if (scene == "getprf") {
 		  		state = resu["state"]
 		  		if (state != 0) {
@@ -141,7 +103,10 @@
 		  	} else if (scene == "checkrep") {
 		  		alert(resu)
 		  		scene = "allowposts"
-		  	}
+		  	} else if (scene == "gub") {
+				alert("Bio: ''" + resu["bio"] + "'' Badges: ''" + resu["badges"] + "'' Profiles are not finished.")
+				scene = "allowposts"
+			}
 		  }
 		});
 		
@@ -166,10 +131,30 @@
 			document.getElementById('postinput').value = ""
 		}
 		
+		function setBio() {
+			var data = JSON.stringify({ask: "set_bio", bio: prompt("Set your bio...")})
+			console.log(data)
+			ws.send(data)
+		}
+		
 		function reportPost(postId, username) {
 			var data = JSON.stringify({ask: "report_post", id: postId, reason: `Sardonyx-HTML easy report from ${username}.`})
 			console.log(data)
 			ws.send(data)
+		}
+		
+		function likePost(postId) {
+			var data = JSON.stringify({ask: "like_post", id: postId})
+			console.log(data)
+			ws.send(data)
+			document.getElementById(postId).innerHTML = "Liked!"
+		}
+		
+		function getUserBio(username) {
+			var data = JSON.stringify({ask: "get_user", username: username})
+			console.log(data)
+			ws.send(data)
+			scene = "gub"
 		}
 		
 		function banUser() {
@@ -193,6 +178,43 @@
 	
 		function ping() {
 			ws.send(JSON.stringify({ask: "ping"}))
+		}
+		
+		function loadPost(resf, isFetch) {
+			console.log("Loading post " + resf["_id"])
+			tsr = resf["timestamp"]
+			tsra = tsr * 1000
+		  	tsrb = Math.trunc(tsra)
+		  	var ts = new Date();
+			ts.setTime(tsrb);
+			sts = ts.toLocaleString();
+
+			var post = document.createElement("div");
+			post.classList.add("post");
+
+			var postUsername = document.createElement("h2");
+			postUsername.innerHTML = `<u><rep class='curs' onclick='getUserBio("${resf["username"]}")'>${resf["username"]}</rep></u>`;
+			post.appendChild(postUsername);
+
+            var postDetails = document.createElement("small");
+            postDetails.innerHTML = `${sts} <b>·</b> <u><rep class='curs' onclick='reportPost("${resf["_id"]}", "${usrn}")'>Report this post</rep></u> <b>·</b> ${resf["_id"]}`;
+            post.appendChild(postDetails);
+
+			var postContent = document.createElement("p");
+			postContent.innerText = resf["content"];
+			post.appendChild(postContent);
+			
+			var postLike = document.createElement("thethingy");
+			postLike.innerHTML = `<div id='${resf["_id"]}'><u><rep class='curs' onclick='likePost("${resf["_id"]}")'>${resf["likes"].length} likes</rep></u></div>`;
+			post.appendChild(postLike);
+
+			if (isFetch) {
+				document.getElementById("scene").appendChild(post);
+            } else {
+				document.getElementById("scene").insertBefore(post, document.getElementById("scene").firstChild);
+			}
+			
+			//document.getElementById("scene").innerHTML += "<br><div id='post'><h2>" + resf["username"] + "</h2><small>" + sts + " // <u><rep id='curs' onclick='reportPost(\"" + resf["_id"] + "\", \"" + usrn + "\")'>Report this post</rep></u> // " + resf["_id"] + "</small><p >" + resf["content"] + "</p></div>"
 		}
 
 		setInterval(ping, 10000)
