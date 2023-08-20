@@ -14,7 +14,7 @@
 	<div id="functions"></div>
 	<div id="scene"><center><h1>Loading...</h1></center></div>
 	<script>
-		const version = "public-beta-2-1" // change this every update cause yes
+		const version = "public-beta-2-2" // change this every update cause yes
 		wsr = "wss://server.getsardonyx.cc" // change this to whatever the server url is
 		const ws = new WebSocket(wsr)
 		var scene = "loading"
@@ -205,7 +205,7 @@
 			post.appendChild(postContent);
 			
 			var postLike = document.createElement("thethingy");
-			postLike.innerHTML = `<div id='${resf["_id"]}'><u><rep class='curs' onclick='likePost("${resf["_id"]}")'>${resf["likes"].length} likes</rep></u></div> <b>·</b> <a href='https://getsardonyx.cc/post.html?${resf["_id"]}'>Share</a>`;
+			postLike.innerHTML = `<wtf id='${resf["_id"]}'><u><rep class='curs' onclick='likePost("${resf["_id"]}")'>${resf["likes"].length} likes</rep></u></wtf> <b>·</b> <a href='https://getsardonyx.cc/post.html?${resf["_id"]}'>Share</a>`;
 			post.appendChild(postLike);
 
 			if (isFetch) {
