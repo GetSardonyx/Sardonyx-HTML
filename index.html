@@ -41,7 +41,8 @@
 		});
 		
 		ws.onclose = (event) => {
-			document.getElementById("header").innerHTML = "<center><h1>Connection lost.</h1><h2>Try reloading the page, and if that doesn't work, check back later.</h2><small>You can also check <a href='https://status.getsardonyx.cc'>our status page</a>.</small></center>"
+			// document.getElementById("header").innerHTML = "<center><h1>Connection lost.</h1><h2>Try reloading the page, and if that doesn't work, check back later.</h2><small>You can also check <a href='https://status.getsardonyx.cc'>our status page</a>.</small></center>"
+			document.getElementById("header").innerHTML = "<center><h1>We're offline for now.</h1><h2>This public beta has been concluded, thank you for trying out the platform.</h2></center>"
 			document.getElementById("functions").innerHTML = ""
 			document.getElementById("scene").innerHTML = ""
 		};
